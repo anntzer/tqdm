@@ -771,11 +771,12 @@ class tqdm(Comparable):
 
     def __init__(self, iterable=None, desc=None, total=None, leave=True,
                  file=None, ncols=None, mininterval=0.1, maxinterval=10.0,
-                 miniters=None, waituntil=0.0, ascii=None, disable=False,
-                 unit='it', unit_scale=False, dynamic_ncols=False,
-                 smoothing=0.3, bar_format=None, initial=0, position=None,
-                 postfix=None, unit_divisor=1000, write_bytes=None,
-                 lock_args=None, gui=False, **kwargs):
+                 miniters=None, ascii=None, disable=False, unit='it',
+                 unit_scale=False, dynamic_ncols=False, smoothing=0.3,
+                 bar_format=None, initial=0, position=None, postfix=None,
+                 unit_divisor=1000, write_bytes=None, lock_args=None,
+                 waituntil=0,
+                 gui=False, **kwargs):
         """
         Parameters
         ----------
@@ -821,9 +822,6 @@ class tqdm(Comparable):
             Tweak this and `mininterval` to get very efficient loops.
             If your progress is erratic with both fast and slow iterations
             (network, skipping items, etc) you should set miniters=1.
-        waituntil  : float, optional
-            Don't display the progressbar until this number [default: 0] of
-            seconds has elapsed.
         ascii  : bool or str, optional
             If unspecified or False, use unicode (smooth blocks) to fill
             the meter. The fallback is to use ASCII characters " 123456789#".
@@ -878,6 +876,8 @@ class tqdm(Comparable):
         lock_args  : tuple, optional
             Passed to `refresh` for intermediate output
             (initialisation, iterating, and updating).
+        waituntil  : float, optional
+            Don't display until [default: 0] seconds have elapsed.
         gui  : bool, optional
             WARNING: internal parameter - do not use.
             Use tqdm.gui.tqdm(...) instead. If set, will attempt to use
@@ -979,13 +979,13 @@ class tqdm(Comparable):
         self.maxinterval = maxinterval
         self.miniters = miniters
         self.dynamic_miniters = dynamic_miniters
-        self.waituntil = waituntil
         self.ascii = ascii
         self.disable = disable
         self.unit = unit
         self.unit_scale = unit_scale
         self.unit_divisor = unit_divisor
         self.lock_args = lock_args
+        self.waituntil = waituntil
         self.gui = gui
         self.dynamic_ncols = dynamic_ncols
         self.smoothing = smoothing
@@ -1082,7 +1082,7 @@ class tqdm(Comparable):
         dynamic_miniters = self.dynamic_miniters
         last_print_t = self.last_print_t
         last_print_n = self.last_print_n
-        start_t = self.start_t
+        min_start_t = self.start_t + self.waituntil
         n = self.n
         smoothing = self.smoothing
         avg_time = self.avg_time
@@ -1104,7 +1104,7 @@ class tqdm(Comparable):
                 miniters = self.miniters  # watch monitoring thread changes
                 cur_t = time()
                 delta_t = cur_t - last_print_t
-                if delta_t >= mininterval and cur_t - start_t >= self.waituntil:
+                if delta_t >= mininterval and cur_t >= min_start_t:
                     delta_it = n - last_print_n
                     # EMA (not just overall average)
                     if smoothing and delta_t and delta_it:
@@ -1181,8 +1181,8 @@ class tqdm(Comparable):
         if self.n - self.last_print_n >= self.miniters:
             cur_t = self._time()
             delta_t = cur_t - self.last_print_t
-            if (delta_t >= self.mininterval
-                    and cur_t - self.start_t >= self.waituntil):
+            if (delta_t >= self.mininterval and
+                    cur_t >= self.start_t + self.waituntil):
                 delta_it = self.n - self.last_print_n  # >= n
                 # elapsed = cur_t - self.start_t
                 # EMA (not just overall average)
@@ -1255,17 +1255,18 @@ class tqdm(Comparable):
         leave = pos == 0 if self.leave is None else self.leave
 
         with self._lock:
-            # If the following doesn't hold, we haven't even printed anything.
-            if self.last_print_t - self.start_t >= self.waituntil:
-                if leave:
-                    # stats for overall rate (no weighted average)
-                    self.avg_time = None
-                    self.display(pos=0)
-                    fp_write('\n')
-                else:
-                    self.display(msg='', pos=pos)
-                    if not pos:
-                        fp_write('\r')
+            if self.last_print_t < self.start_t + self.waituntil:
+                # haven't ever displayed; nothing to clear
+                return
+            if leave:
+                # stats for overall rate (no weighted average)
+                self.avg_time = None
+                self.display(pos=0)
+                fp_write('\n')
+            else:
+                self.display(msg='', pos=pos)
+                if not pos:
+                    fp_write('\r')
 
     def clear(self, nolock=False):
         """Clear current bar display."""
