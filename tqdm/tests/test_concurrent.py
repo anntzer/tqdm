@@ -3,7 +3,7 @@ Tests for `tqdm.contrib.concurrent`.
 """
 from warnings import catch_warnings
 from tqdm.contrib.concurrent import thread_map, process_map
-from tests_tqdm import with_setup, pretest, posttest, SkipTest, StringIO, \
+from test_tqdm import with_setup, pretest, posttest, SkipTest, StringIO, \
     closing
 
 

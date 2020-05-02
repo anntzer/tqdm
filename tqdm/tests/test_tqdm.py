@@ -2,15 +2,14 @@
 # Advice: use repr(our_file.read()) to print the full output of tqdm
 # (else '\r' will replace the previous lines and you'll see only the latest.
 
-import sys
 import csv
-import re
+import functools
 import os
-from nose import with_setup
-from nose.plugins.skip import SkipTest
-from nose.tools import assert_raises
-from nose.tools import eq_
+import re
+import sys
 from contextlib import contextmanager
+from functools import partial
+from unittest import SkipTest, TestCase
 from warnings import catch_warnings, simplefilter
 
 from tqdm import tqdm
@@ -56,6 +55,16 @@ if os.name == 'nt':
         import colorama  # NOQA
     except ImportError:
         nt_and_no_colorama = True
+
+
+class PseudoTest(TestCase):
+    def runTest(self):
+        pass
+
+
+eq_ = PseudoTest().assertEqual
+assert_raises = PseudoTest().assertRaises
+
 
 # Regex definitions
 # List of control characters
@@ -140,6 +149,21 @@ def posttest():
             tqdm._instances.clear()
             raise EnvironmentError(
                 "{0} `tqdm` instances still in existence POST-test".format(n))
+
+
+def with_setup(pretest, posttest, func=None):
+    if func is None:
+        return partial(with_setup, pretest, posttest)
+
+    @functools.wraps(func)
+    def wrapper():
+        pretest()
+        try:
+            func()
+        finally:
+            posttest()
+
+    return wrapper
 
 
 class UnicodeIO(IOBase):

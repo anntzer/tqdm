@@ -2,7 +2,7 @@
 Tests for `tqdm.contrib.itertools`.
 """
 from tqdm.contrib.itertools import product
-from tests_tqdm import with_setup, pretest, posttest, StringIO, closing
+from test_tqdm import with_setup, pretest, posttest, StringIO, closing
 import itertools
 
 

@@ -1,5 +1,5 @@
 from tqdm.notebook import tqdm as tqdm_notebook
-from tests_tqdm import with_setup, pretest, posttest
+from test_tqdm import with_setup, pretest, posttest
 
 
 @with_setup(pretest, posttest)

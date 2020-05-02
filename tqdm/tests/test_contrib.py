@@ -3,7 +3,7 @@ Tests for `tqdm.contrib`.
 """
 import sys
 from tqdm.contrib import tenumerate, tzip, tmap
-from tests_tqdm import with_setup, pretest, posttest, SkipTest, StringIO, \
+from test_tqdm import with_setup, pretest, posttest, SkipTest, StringIO, \
     closing
 
 

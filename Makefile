@@ -61,7 +61,7 @@ testsetup:
 
 testcoverage:
 	@make coverclean
-	nosetests tqdm --with-coverage --cover-package=tqdm --cover-erase --cover-min-percentage=80 --ignore-files="tests_perf\.py" -d -v
+	nosetests tqdm --with-coverage --cover-package=tqdm --cover-erase --cover-min-percentage=80 --ignore-files="test_perf\.py" -d -v
 
 testperf:
 	# do not use coverage (which is extremely slow)

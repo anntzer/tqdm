@@ -6,7 +6,7 @@ from tempfile import mkdtemp
 from tqdm.cli import main, TqdmKeyError, TqdmTypeError
 from tqdm.utils import IS_WIN
 
-from tests_tqdm import with_setup, pretest, posttest, _range, closing, \
+from test_tqdm import with_setup, pretest, posttest, _range, closing, \
     UnicodeIO, StringIO, SkipTest
 
 

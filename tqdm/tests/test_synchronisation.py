@@ -1,9 +1,9 @@
 from __future__ import division
 from tqdm import tqdm, trange, TMonitor
-from tests_tqdm import with_setup, pretest, posttest, SkipTest, \
+from test_tqdm import with_setup, pretest, posttest, SkipTest, \
     StringIO, closing
-from tests_tqdm import DiscreteTimer, cpu_timify
-from tests_perf import retry_on_except
+from test_tqdm import DiscreteTimer, cpu_timify
+from test_perf import retry_on_except
 
 import sys
 from time import sleep

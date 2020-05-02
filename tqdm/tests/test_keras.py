@@ -1,6 +1,6 @@
 from __future__ import division
 from tqdm import tqdm
-from tests_tqdm import with_setup, pretest, posttest, SkipTest, StringIO, \
+from test_tqdm import with_setup, pretest, posttest, SkipTest, StringIO, \
     closing
 
 
